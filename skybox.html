@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="shortcut icon" href="./favicon.ico">
+  <title>Three练习</title>
+  <script src="./Three97.js"></script>
+  <script src="./Stats.js"></script>
+  <script src="./OrbitControls.js"></script>
+  <script src="./LoaderSupport.js"></script>
+  <script src="./OBJLoader.js"></script>
+  <style type="text/css">
+    body {
+      margin: 0;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+  <script>
+    function threeStart() {
+      initThree();
+      initCamera();
+      initScene();
+      initControl();
+      initLight();
+      initObject();
+      animation();
+      initStats();
+    }
+
+    var renderer, width, height
+    function initThree() {
+      width = window.innerWidth
+      height = window.innerHeight
+      renderer = new THREE.WebGLRenderer({
+        antialias: true
+      })
+      renderer.setSize(width, height)
+      // renderer.setClearColor(0x000000, 1.0);
+      document.body.appendChild(renderer.domElement);
+    }
+
+    var camera;
+    function initCamera() {
+      camera = new THREE.PerspectiveCamera(90, width / height, 0.1, 1e6)
+      camera.position.set(0, 0, 5)
+      camera.lookAt(0, 0, 0)
+    }
+
+    var scene
+    function initScene() {
+      scene = new THREE.Scene()
+    }
+
+    var control
+    function initControl () {
+      control = new THREE.OrbitControls( camera, renderer.domElement )
+    }
+
+    var ambientLight, pointLight, directionalLight, spotLight
+    function initLight() {
+      ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.1)
+      scene.add(ambientLight)
+      // pointLight = new THREE.PointLight(0xFFFFFF, 1.0, 1e6)
+      // pointLight.position.set(0, 10, 10)
+      // scene.add(pointLight)
+      directionalLight = new THREE.DirectionalLight(0xF08257, 1.0)
+      directionalLight.position.set(0, 30, 10)
+      scene.add(directionalLight)
+      // spotLight = new THREE.SpotLight(0xFFFFFF, 1.0)
+      // spotLight.position.set(0, 10, 10)
+      // scene.add(spotLight)
+    }
+
+    var mesh;
+    function initObject() {
+      let edge = 1e5
+      // let place = 'snow'
+      // let place = 'mars'
+      let place = 'devil'
+      // let place = 'scene1'
+      // let place = 'scene2'
+      var geometry = new THREE.BoxGeometry(edge, edge, edge)
+      // var materials = [
+      //   new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('./skybox/' + place + '/ft.png'), side: THREE.DoubleSide }), //front
+      //   new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('./skybox/' + place + '/bk.png'), side: THREE.DoubleSide }), //back
+      //   new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('./skybox/' + place + '/up.png'), side: THREE.DoubleSide }), //top
+      //   new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('./skybox/' + place + '/dn.png'), side: THREE.DoubleSide }), //bottom
+      //   new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('./skybox/' + place + '/rt.png'), side: THREE.DoubleSide }), //right
+      //   new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('./skybox/' + place + '/lf.png'), side: THREE.DoubleSide }), //left
+      // ]
+      var materials = [
+        new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('./skybox/' + place + '/rt.png'), side: THREE.DoubleSide }), //right
+        new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('./skybox/' + place + '/lf.png'), side: THREE.DoubleSide }), //left
+        new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('./skybox/' + place + '/up.png'), side: THREE.DoubleSide }), //top
+        new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('./skybox/' + place + '/dn.png'), side: THREE.DoubleSide }), //bottom
+        new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('./skybox/' + place + '/ft.png'), side: THREE.DoubleSide }), //front
+        new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('./skybox/' + place + '/bk.png'), side: THREE.DoubleSide }), //back
+      ]
+      skybox = new THREE.Mesh(geometry, materials)
+      scene.add(skybox)
+
+      // // instantiate the loader
+      // var loader = new THREE.OBJLoader()
+      // // load a resource from provided URL synchronously
+      // loader.load(
+      //   './model.obj',
+      //   (obj) => {
+      //     scene.add(obj)
+      //   },
+      // )
+    }
+
+    function initStats() {
+      var stats = new Stats();
+      stats.setMode(0); // 0: fps, 1: ms
+      // 将stats的界面对应左上角
+      stats.domElement.style.position = 'absolute';
+      stats.domElement.style.left = '0px';
+      stats.domElement.style.top = '0px';
+      document.body.appendChild(stats.domElement);
+      setInterval(function () {
+        stats.begin();
+        // 你的每一帧的代码
+        stats.end();
+      }, 1000 / 60);
+    }
+
+    function animation() {
+      requestAnimationFrame(animation)
+
+      update()
+      render()
+    }
+
+    function update () {
+      // mesh.rotation.y += 0.01
+    }
+
+    function render () {
+      renderer.render(scene, camera)
+    }
+
+    function updateViewPort () {
+      width = window.innerWidth
+      height = window.innerHeight
+      renderer.setSize(width, height)
+      camera.aspect = width / height
+      camera.updateProjectionMatrix()
+    }
+    window.addEventListener('resize', updateViewPort)
+
+  </script>
+</head>
+
+<body onload="threeStart();"></body>
+
+</html>

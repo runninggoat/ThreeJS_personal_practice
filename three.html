@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="shortcut icon" href="./favicon.ico">
+  <title>Three练习</title>
+  <script src="./Three97.js"></script>
+  <script src="./Stats.js"></script>
+  <script src="./OrbitControls.js"></script>
+  <script src="./LoaderSupport.js"></script>
+  <script src="./OBJLoader.js"></script>
+  <style type="text/css">
+    body {
+      margin: 0;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+  <script>
+    function threeStart() {
+      initThree();
+      initCamera();
+      initScene();
+      initControl();
+      initLight();
+      initObject();
+      animation();
+      initStats();
+    }
+
+    var renderer, width, height
+    function initThree() {
+      width = window.innerWidth
+      height = window.innerHeight
+      renderer = new THREE.WebGLRenderer({
+        antialias: true
+      })
+      renderer.setSize(width, height)
+      // renderer.setClearColor(0x000000, 1.0);
+      document.body.appendChild(renderer.domElement);
+    }
+
+    var camera;
+    function initCamera() {
+      camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1e6)
+      camera.position.set(0, 10, 30)
+      camera.lookAt(0, 0, 0)
+    }
+
+    var scene
+    function initScene() {
+      scene = new THREE.Scene()
+    }
+
+    var control
+    function initControl () {
+      control = new THREE.OrbitControls( camera, renderer.domElement )
+    }
+
+    var ambientLight, pointLight, directionalLight, spotLight
+    function initLight() {
+      ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.1)
+      scene.add(ambientLight)
+      // pointLight = new THREE.PointLight(0xFFFFFF, 1.0, 1e6)
+      // pointLight.position.set(0, 10, 10)
+      // scene.add(pointLight)
+      // directionalLight = new THREE.DirectionalLight(0xFFFFFF, 1.0)
+      // directionalLight.position.set(0, 10, 10)
+      // scene.add(directionalLight)
+      spotLight = new THREE.SpotLight(0xFFFFFF, 1.0)
+      spotLight.position.set(0, 10, 10)
+      scene.add(spotLight)
+    }
+
+    var mesh;
+    function initObject() {
+      var geometry = new THREE.BoxGeometry(10, 10, 10)
+      var materials = [
+        new THREE.MeshLambertMaterial({ color: 0x0000FF, wireframe: false, side: THREE.DoubleSide }), //right
+        new THREE.MeshLambertMaterial({ color: 0xFFFFFF, wireframe: true }), //left
+        new THREE.MeshLambertMaterial({ color: 0xFF0000, wireframe: false, side: THREE.DoubleSide }), //top
+        new THREE.MeshLambertMaterial({ color: 0xFFFFFF, wireframe: false, side: THREE.DoubleSide }), //bottom
+        new THREE.MeshLambertMaterial({ map: new THREE.TextureLoader().load('./apple.png'), side: THREE.DoubleSide }), //front
+        new THREE.MeshLambertMaterial({ color: 0x00FF00, wireframe: false }), //back
+      ]
+      // var material = new THREE.MeshLambertMaterial({ color: 0xFFFFFF, wireframe: false })
+      // mesh = new THREE.Mesh(geometry, material)
+      mesh = new THREE.Mesh(geometry, materials)
+      // mesh.position = new THREE.Vector3(0, 0, 0);
+      scene.add(mesh);
+
+      // instantiate the loader
+      var loader = new THREE.OBJLoader()
+      // load a resource from provided URL synchronously
+      loader.load(
+        './model.obj',
+        (obj) => {
+          scene.add(obj)
+        },
+      )
+    }
+
+    function initStats() {
+      var stats = new Stats();
+      stats.setMode(0); // 0: fps, 1: ms
+      // 将stats的界面对应左上角
+      stats.domElement.style.position = 'absolute';
+      stats.domElement.style.left = '0px';
+      stats.domElement.style.top = '0px';
+      document.body.appendChild(stats.domElement);
+      setInterval(function () {
+        stats.begin();
+        // 你的每一帧的代码
+        stats.end();
+      }, 1000 / 60);
+    }
+
+    function animation() {
+      requestAnimationFrame(animation)
+
+      update()
+      render()
+    }
+
+    function update () {
+      // mesh.rotation.y += 0.01
+    }
+
+    function render () {
+      renderer.render(scene, camera)
+    }
+
+    function updateViewPort () {
+      width = window.innerWidth
+      height = window.innerHeight
+      renderer.setSize(width, height)
+      camera.aspect = width / height
+      camera.updateProjectionMatrix()
+    }
+    window.addEventListener('resize', updateViewPort)
+
+  </script>
+</head>
+
+<body onload="threeStart();"></body>
+
+</html>

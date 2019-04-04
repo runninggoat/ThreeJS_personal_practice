@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="shortcut icon" href="./favicon.ico">
+  <title>Udacity ThreeJS Practice</title>
+  <script src="./Three97.js"></script>
+  <script src="./Stats.js"></script>
+  <script type="text/javascript" src="./dat.gui.min.js"></script>
+  <script src="./OrbitControls.js"></script>
+  <script src="./LoaderSupport.js"></script>
+  <script src="./OBJLoader.js"></script>
+  <style type="text/css">
+    body {
+      margin: 0;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+  <script>
+    function threeStart() {
+      initThree()
+      initCamera()
+      initScene()
+      initControl()
+      initLight()
+      initObject()
+      animation()
+    }
+
+    var renderer, banner, width, height
+    function initThree() {
+      banner = document.getElementById('banner')
+      width = banner.clientWidth
+      height = banner.clientHeight
+      renderer = new THREE.WebGLRenderer({ antialias: true })
+      renderer.setSize(width, height)
+      renderer.setClearColor(0x000000, 1.0)
+      banner.appendChild(renderer.domElement)
+    }
+
+    var camera
+    function initCamera() {
+      camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1e6)
+      camera.position.set(0, 0, 20)
+      camera.lookAt(0, 0, 0)
+    }
+
+    var scene
+    function initScene() {
+      scene = new THREE.Scene()
+    }
+
+    var control
+    function initControl () {
+      control = new THREE.OrbitControls( camera, renderer.domElement )
+    }
+
+    var ambientLight, pointLight, directionalLight, spotLight
+    function initLight() {
+      ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.3)
+      scene.add(ambientLight)
+      // pointLight = new THREE.PointLight(0xFFFFFF, 1.0, 1e6)
+      // pointLight.position.set(10, 10, 5)
+      // scene.add(pointLight)
+      // directionalLight = new THREE.DirectionalLight(0xF08257, 1.0)
+      // directionalLight.position.set(0, 30, 10)
+      // scene.add(directionalLight)
+      spotLight = new THREE.SpotLight(0xFFFFFF, 1.0, 1e3, 30 * Math.PI / 180)
+      spotLight.position.set(10, 10, 5)
+      scene.add(spotLight)
+    }
+
+    var loader, typoMaterial, typoMesh
+    function initObject() {
+      typoMaterial = new THREE.MeshLambertMaterial({ color: 0x2194ce })
+      loader = new THREE.FontLoader()
+      loader.load('./fonts/LiSu_Regular.json', function ( font ) {
+        var geometry = new THREE.TextGeometry('Tom的Github园地', {
+          font: font,
+          size: 3,
+          height: 0.1,
+          curveSegments: 12,
+          bevelEnabled: true,
+          bevelThickness: 0.1,
+          bevelSize: 0.1,
+          bevelSegments: 3,
+        })
+        geometry.computeBoundingBox()
+        var mesh = new THREE.Mesh(geometry, typoMaterial)
+        mesh.position.x = - 0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x )
+        mesh.position.y = - 0.3 * ( geometry.boundingBox.max.y - geometry.boundingBox.min.y )
+        typoMesh = new THREE.Object3D()
+        typoMesh.add(mesh)
+        scene.add(typoMesh)
+      })
+    }
+
+    function animation() {
+      requestAnimationFrame(animation)
+
+      update()
+      render()
+    }
+
+    function update () {
+      if (typoMesh) {
+        typoMesh.rotation.y += (0.5 * Math.PI / 180)
+      }
+    }
+
+    function render () {
+      renderer.render(scene, camera)
+    }
+
+    function updateViewPort () {
+      width = banner.clientWidth
+      height = banner.clientHeight
+      renderer.setSize(width, height)
+      camera.aspect = width / height
+      camera.updateProjectionMatrix()
+    }
+    window.addEventListener('resize', updateViewPort)
+
+  </script>
+</head>
+
+<body onload="threeStart();">
+  <div id="banner" style="width: 100%; height: 300px;"></div>
+</body>
+
+</html>

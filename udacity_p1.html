@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="shortcut icon" href="./favicon.ico">
+  <title>Udacity ThreeJS Practice</title>
+  <script src="./Three97.js"></script>
+  <script src="./Stats.js"></script>
+  <script type="text/javascript" src="./dat.gui.min.js"></script>
+  <script src="./OrbitControls.js"></script>
+  <script src="./LoaderSupport.js"></script>
+  <script src="./OBJLoader.js"></script>
+  <style type="text/css">
+    body {
+      margin: 0;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+  <script>
+    function threeStart() {
+      initDatGUI()
+      initThree()
+      initCamera()
+      initScene()
+      initControl()
+      initLight()
+      initObject()
+      initStats()
+      animation()
+    }
+
+    var controls, gui
+    function initDatGUI () {
+      controls = new function () {
+        this.clearColor = '#222222'
+        this.sides = 3
+        this.radius = 1
+      }
+      gui = new dat.GUI()
+      initDatGUIControllers()
+    }
+
+    var clearColorController, sideController, radiusController
+    function initDatGUIControllers () {
+      clearColorController = gui.addColor(controls, 'clearColor').name('背景清除色')
+      clearColorController.onChange((value) => {
+        renderer.setClearColor(controls.clearColor, 1.0)
+      })
+      sideController = gui.add(controls, 'sides', 3, 20).name('多边形边数').step(1)
+      sideController.onChange(value => {
+        scene.remove(polygonMesh)
+        polygonMesh = polygonMeshGenerator(value, controls.radius)
+        scene.add(polygonMesh)
+      })
+      radiusController = gui.add(controls, 'radius', 1, 5).name('多边形半径').step(0.1)
+      radiusController.onChange(value => {
+        scene.remove(polygonMesh)
+        polygonMesh = polygonMeshGenerator(controls.sides, value)
+        scene.add(polygonMesh)
+      })
+    }
+
+    var renderer, width, height
+    function initThree() {
+      width = window.innerWidth
+      height = window.innerHeight
+      renderer = new THREE.WebGLRenderer({ antialias: true })
+      renderer.setSize(width, height)
+      renderer.setClearColor(controls.clearColor, 1.0)
+      document.body.appendChild(renderer.domElement)
+    }
+
+    var camera;
+    function initCamera() {
+      camera = new THREE.PerspectiveCamera(90, width / height, 0.1, 1e6)
+      camera.position.set(0, 0, 5)
+      camera.lookAt(0, 0, 0)
+    }
+
+    var scene
+    function initScene() {
+      scene = new THREE.Scene()
+    }
+
+    var control
+    function initControl () {
+      control = new THREE.OrbitControls( camera, renderer.domElement )
+    }
+
+    var ambientLight, pointLight, directionalLight, spotLight
+    function initLight() {
+      ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.1)
+      scene.add(ambientLight)
+      // pointLight = new THREE.PointLight(0xFFFFFF, 1.0, 1e6)
+      // pointLight.position.set(0, 10, 10)
+      // scene.add(pointLight)
+      // directionalLight = new THREE.DirectionalLight(0xF08257, 1.0)
+      // directionalLight.position.set(0, 30, 10)
+      // scene.add(directionalLight)
+      // spotLight = new THREE.SpotLight(0xFFFFFF, 1.0)
+      // spotLight.position.set(0, 10, 10)
+      // scene.add(spotLight)
+    }
+
+    var tiangleMesh, polygonMesh
+    function initObject() {
+      // let triangle = new THREE.Geometry()
+      // triangle.vertices.push(new THREE.Vector3(0, 0, 0))
+      // triangle.vertices.push(new THREE.Vector3(3, 0, 0))
+      // triangle.vertices.push(new THREE.Vector3(3, 3, 0))
+      // triangle.faces.push(new THREE.Face3(0, 1, 2))
+      // let orangeBasicMaterial = new THREE.MeshBasicMaterial({ color: 0xF6831E, side: THREE.DoubleSide })
+      // triangleMesh = new THREE.Mesh(triangle, orangeBasicMaterial)
+      // scene.add(triangleMesh)
+
+      polygonMesh = polygonMeshGenerator(controls.sides, controls.radius)
+      scene.add(polygonMesh)
+    }
+
+    function polygonMeshGenerator (sides, radius) {
+      if (sides < 3) throw new Error('Polygon must has at least 3 sides.')
+      let polygon = new THREE.Geometry()
+      let angle, x, y
+      for (let pt = 0; pt < sides; pt++) {
+        angle = 2 * Math.PI * (pt / sides)
+        x = Math.cos(angle) * radius
+        y = Math.sin(angle) * radius
+        polygon.vertices.push(new THREE.Vector3(x, y, 0))
+      }
+      for (let pt = 2; pt < sides; pt++) {
+        polygon.faces.push(new THREE.Face3(0, pt - 1, pt))
+      }
+      let orangeBasicMaterial = new THREE.MeshBasicMaterial({ color: 0xF6831E, side: THREE.DoubleSide })
+      polygonMesh = new THREE.Mesh(polygon, orangeBasicMaterial)
+      return polygonMesh
+    }
+
+    function initStats() {
+      var stats = new Stats()
+      stats.setMode(0) // 0: fps, 1: ms
+      // 将stats的界面对应左上角
+      stats.domElement.style.position = 'absolute'
+      stats.domElement.style.left = '5px'
+      stats.domElement.style.top = '5px'
+      document.body.appendChild(stats.domElement)
+      setInterval(function () {
+        stats.begin()
+        // 你的每一帧的代码
+        stats.end()
+      }, 1000 / 60)
+    }
+
+    function animation() {
+      requestAnimationFrame(animation)
+
+      update()
+      render()
+    }
+
+    function update () {
+      // mesh.rotation.y += 0.01
+    }
+
+    function render () {
+      renderer.render(scene, camera)
+    }
+
+    function updateViewPort () {
+      width = window.innerWidth
+      height = window.innerHeight
+      renderer.setSize(width, height)
+      camera.aspect = width / height
+      camera.updateProjectionMatrix()
+    }
+    window.addEventListener('resize', updateViewPort)
+
+  </script>
+</head>
+
+<body onload="threeStart();"></body>
+
+</html>
